@@ -16,6 +16,10 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import com.totalit.nbsz_server.business.domain.Donor;
+import com.totalit.nbsz_server.business.util.AppUtil;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -195,7 +199,17 @@ public class MainActivity extends AppCompatActivity {
                         PrintWriter output = new PrintWriter(s.getOutputStream());
 
                         stringData = input.readLine();
-                        Log.d("FROM SERVER", stringData);
+                        JSONObject obj = null;
+                        try{
+                            obj = new JSONObject(stringData);
+                            String requestType = obj.getString("requestType");
+                            if(requestType.equals("POST_DONOR")){
+                                saveDonorData(obj);
+                            }
+                        }catch (JSONException ex){
+                            ex.printStackTrace();
+                        }
+
                         output.println("FROM SERVER - " + stringData.toUpperCase());
                         output.flush();
 
@@ -223,5 +237,13 @@ public class MainActivity extends AppCompatActivity {
 
         });
         thread.start();
+    }
+
+    public void saveDonorData(JSONObject object){
+        Donor item = Donor.fromJSON(object);
+        item.save();
+        for(Donor m : Donor.getAll()){
+            Log.d("Donor", AppUtil.createGson().toJson(m));
+        }
     }
 }
