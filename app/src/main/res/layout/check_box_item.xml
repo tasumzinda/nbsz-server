@@ -1,0 +1,10 @@
+<CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
+
+                 android:id="@+id/adapter_name"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:text=""
+                 android:gravity="center"
+                 android:textSize="@dimen/text_size"
+                 android:drawableLeft="@drawable/check_box_selector"
+/>

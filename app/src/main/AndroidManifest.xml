@@ -22,13 +22,19 @@
                 android:value="nsbz_server.db"/>
 
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".activity.MainActivity"/>
+        <activity android:name=".activity.DownloadDataActivity"/>
+        <activity android:name=".activity.SelectCollectSiteActivity"/>
+        <activity android:name=".activity.SelectUserActivity"/>
+        <activity android:name=".activity.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <service android:name=".business.rest.PushPullService"/>
+        <service android:name=".business.rest.DownloadDonor"/>
     </application>
 
 </manifest>

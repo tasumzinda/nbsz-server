@@ -1,4 +1,4 @@
-package com.totalit.nbsz_server;
+package com.totalit.nbsz_server.activity;
 
 import android.content.*;
 import android.net.ConnectivityManager;
@@ -16,6 +16,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import com.totalit.nbsz_server.R;
 import com.totalit.nbsz_server.business.domain.Donor;
 import com.totalit.nbsz_server.business.util.AppUtil;
 import org.json.JSONException;
@@ -28,7 +29,7 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     private static final int DEFAULT_PORT = 9002;
 
@@ -49,6 +50,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Intent intent = getIntent();
+        String download = intent.getStringExtra("download");
+        if(download != null && ! download.isEmpty()){
+            downloadDonors();
+        }
 
         // INIT VIEW
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
@@ -183,22 +189,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startServerSocket() {
-
         Thread thread = new Thread(new Runnable() {
-
             private String stringData = null;
-
             @Override
             public void run() {
-
                 try {
                     while (!end) {
                         //Server is waiting for client here, if needed
                         Socket s = androidWebServer.accept();
                         BufferedReader input = new BufferedReader(new InputStreamReader(s.getInputStream()));
                         PrintWriter output = new PrintWriter(s.getOutputStream());
-
                         stringData = input.readLine();
+                        Log.d("Data", stringData);
                         JSONObject obj = null;
                         try{
                             obj = new JSONObject(stringData);
@@ -208,8 +210,8 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }catch (JSONException ex){
                             ex.printStackTrace();
+                            textViewIpAccess.setText(ex.getMessage());
                         }
-
                         output.println("FROM SERVER - " + stringData.toUpperCase());
                         output.flush();
 
@@ -232,6 +234,7 @@ public class MainActivity extends AppCompatActivity {
                     androidWebServer.close();
                 } catch (IOException e) {
                     e.printStackTrace();
+                    textViewIpAccess.setText(e.getMessage());
                 }
             }
 
@@ -240,10 +243,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void saveDonorData(JSONObject object){
-        Donor item = Donor.fromJSON(object);
+        Log.d("JSON", object.toString());
+        Donor item = fromJSON(object);
+        Log.d("Donor", AppUtil.createGson().toJson(item));
         item.save();
-        for(Donor m : Donor.getAll()){
-            Log.d("Donor", AppUtil.createGson().toJson(m));
-        }
     }
 }

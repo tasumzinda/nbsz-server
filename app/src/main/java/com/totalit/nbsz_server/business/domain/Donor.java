@@ -1,4 +1,5 @@
 package com.totalit.nbsz_server.business.domain;
+import android.util.Log;
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
@@ -7,7 +8,6 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.totalit.nbsz_server.business.domain.util.*;
 import com.totalit.nbsz_server.business.util.DateUtil;
-import com.totalit.nbsz_server.business.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,18 +25,12 @@ public class Donor extends Model implements Serializable {
     @Column(name = "server_id")
     @SerializedName("id")
     public Long server_id;
-
-    public Long professionId;
     @Expose
     @Column(name = "profession")
     public Profession profession;
-
-    public Long maritalStatusId;
     @Expose
     @Column(name = "marital_status")
     public MaritalStatus maritalStatus;
-
-    public Long cityId;
     @Expose
     @Column(name = "city")
     public Centre city;
@@ -92,10 +86,6 @@ public class Donor extends Model implements Serializable {
     @Column(name = "email")
     public String email;
 
-    public YesNo consentToUpdate;
-
-    public String bloodPressure;
-
     @Expose
     @Column(name = "donor_number")
     public String donorNumber;
@@ -104,89 +94,13 @@ public class Donor extends Model implements Serializable {
     @Column(name = "bled_by")
     public User bledBy;
 
-    public Long userId;
-
-    public Double weight;
-
     @Expose
     @Column(name = "counsellor")
     public Counsellor counsellor;
 
-    public DonateDefer donateDefer;
-
-    public YesNo feelingWellToday;
-
-    public YesNo refusedToDonate;
-
-    public YesNo beenToMalariaArea;
-
-    public YesNo mealOrSnack;
-
-    public YesNo dangerousOccupation;
-
-    public YesNo rheumaticFever;
-
-    public YesNo lungDisease;
-
-    public YesNo cancer;
-
-    public YesNo diabetes;
-
-    public YesNo chronicMedicalCondition;
-
-    public YesNo beenToDentist;
-
-    public YesNo takenAntibiotics;
-
-    public YesNo injection;
-
-    public YesNo beenIll;
-
-    public YesNo receivedBloodTransfusion;
-
     @Column
     @Expose
     public Integer deferPeriod;
-
-    public YesNo hivTest;
-
-    public YesNo beenTestedForHiv;
-
-    public YesNo contactWithPersonWithYellowJaundice;
-
-    public YesNo accidentalExposureToBlood;
-
-    public YesNo beenTattooedOrPierced;
-
-    public YesNo injectedWithIllegalDrugs;
-
-    public YesNo sexWithSomeoneWithUnknownBackground;
-
-    public YesNo exchangedMoneyForSex;
-
-    public YesNo trueForSexPartner;
-
-    public YesNo sufferedFromSTD;
-
-    public YesNo contactWithPersonWithHepatitisB;
-
-    public YesNo sufferedFromNightSweats;
-
-    public PassFail copperSulphate;
-
-    public PassFail hamocue;
-
-    public PackType packType;
-
-    public ReasonForTesting reasonForTesting;
-
-    public YesNo victimOfSexualAbuse;
-
-    public YesNo pregnant;
-
-    public YesNo breastFeeding;
-
-    public Long defferedReasonId;
     @Expose
     @Column(name = "reason_for_deferring")
     public DeferredReason deferredReason;
@@ -194,8 +108,6 @@ public class Donor extends Model implements Serializable {
     @Expose
     @Column(name = "collect_site")
     public CollectSite collectSite;
-
-    public Long donationTypeId;
 
     @Expose
     @Column(name = "donation_type")
@@ -213,8 +125,6 @@ public class Donor extends Model implements Serializable {
     @Column(name = "entry_time")
     public String entryTime;
 
-    public String donationNumber;
-
     @Column
     public Integer pushed = 0;
 
@@ -224,10 +134,6 @@ public class Donor extends Model implements Serializable {
     @Expose
     @Column(name = "defer_notes")
     public String deferNotes;
-
-    /*@Expose
-    @Column
-    public Integer suspicious = 0;*/
 
     @Expose
     @Column(name = "blood_group")
@@ -248,6 +154,14 @@ public class Donor extends Model implements Serializable {
 
 
     public List<SpecialNotes> specialNotes;
+
+    @Expose
+    public List<Donation> donations;
+
+    @Expose
+    public List<DonationStats> donationStats;
+
+    public String requestType;
 
     public Donor(){
         super();
@@ -326,10 +240,10 @@ public class Donor extends Model implements Serializable {
             if( ! object.isNull("idNumber")){
                 item.idNumber = object.getString("idNumber");
             }
-
             if( ! object.isNull("numberOfDonations")){
                 item.numberOfDonations = object.getInt("numberOfDonations");
             }
+
             if( ! object.isNull("gender")){
                 if(object.getString("gender").equals("M") || object.getString("gender").equals("F")){
                     item.gender = Gender.valueOf(object.getString("gender"));
@@ -380,7 +294,7 @@ public class Donor extends Model implements Serializable {
                 c.name = counsellor.getString("name");
                 c.address = counsellor.getString("address");
                 c.phoneNumber = counsellor.getString("phoneNumber");
-                c.code = counsellor.getString("code");
+                //c.code = counsellor.getString("code");
                 c.serverId = counsellor.getLong("id");
                 Counsellor duplicate = Counsellor.findById(c.serverId);
                 if(duplicate == null){
@@ -414,6 +328,8 @@ public class Donor extends Model implements Serializable {
         }
         return item;
     }
+
+
 
     public static ArrayList<Donor> fromJSON(JSONArray array){
         ArrayList<Donor> list = new ArrayList<>();
