@@ -10,6 +10,9 @@ import com.totalit.nbsz_server.business.domain.util.PackType;
 import com.totalit.nbsz_server.business.domain.util.PassFail;
 import com.totalit.nbsz_server.business.domain.util.ReasonForTesting;
 import com.totalit.nbsz_server.business.domain.util.YesNo;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -194,5 +197,80 @@ public class DonationStats extends Model implements Serializable{
         return new Select()
                 .from(DonationStats.class)
                 .execute();
+    }
+
+    public static DonationStats fromJSON(JSONObject object){
+        DonationStats item = new DonationStats();
+        try{
+            if( ! object.isNull("id")){
+                item.server_id = object.getLong("id");
+            }
+            item.feelingWellToday = YesNo.valueOf(object.getString("feelingWellToday"));
+            item.refusedToDonate = YesNo.valueOf(object.getString("refusedToDonate"));
+            item.beenToMalariaArea = YesNo.valueOf(object.getString("beenToMalariaArea"));
+            item.mealOrSnack = YesNo.valueOf(object.getString("mealOrSnack"));
+            item.dangerousOccupation = YesNo.valueOf(object.getString("dangerousOccupation"));
+            item.rheumaticFever = YesNo.valueOf(object.getString("rheumaticFever"));
+            item.lungDisease = YesNo.valueOf(object.getString("lungDisease"));
+            item.cancer = YesNo.valueOf(object.getString("cancer"));
+            item.diabetes = YesNo.valueOf(object.getString("diabetes"));
+            item.chronicMedicalCondition = YesNo.valueOf(object.getString("chronicMedicalCondition"));
+            item.beenToDentist = YesNo.valueOf(object.getString("beenToDentist"));
+            item.takenAntibiotics = YesNo.valueOf(object.getString("takenAntibiotics"));
+            item.injection = YesNo.valueOf(object.getString("injection"));
+            item.beenIll = YesNo.valueOf(object.getString("beenIll"));
+            item.receivedBloodTransfusion = YesNo.valueOf(object.getString("receivedBloodTransfusion"));
+            item.hivTest = YesNo.valueOf(object.getString("hivTest"));
+            item.beenTestedForHiv = YesNo.valueOf(object.getString("beenTestedForHiv"));
+            item.contactWithPersonWithYellowJaundice = YesNo.valueOf(object.getString("contactWithPersonWithYellowJaundice"));
+            item.accidentalExposureToBlood = YesNo.valueOf(object.getString("accidentalExposureToBlood"));
+            item.beenTattooedOrPierced = YesNo.valueOf(object.getString("beenTattooedOrPierced"));
+            item.injectedWithIllegalDrugs = YesNo.valueOf(object.getString("injectedWithIllegalDrugs"));
+            item.sexWithSomeoneWithUnknownBackground = YesNo.valueOf(object.getString("sexWithSomeoneWithUnknownBackground"));
+            item.exchangedMoneyForSex = YesNo.valueOf(object.getString("exchangedMoneyForSex"));
+            item.trueForSexPartner = YesNo.valueOf(object.getString("trueForSexPartner"));
+            item.sufferedFromSTD = YesNo.valueOf(object.getString("sufferedFromSTD"));
+            item.contactWithPersonWithHepatitisB = YesNo.valueOf(object.getString("contactWithPersonWithHepatitisB"));
+            item.sufferedFromNightSweats = YesNo.valueOf(object.getString("sufferedFromNightSweats"));
+            item.victimOfSexualAbuse = YesNo.valueOf(object.getString("victimOfSexualAbuse"));
+            if( ! object.isNull("pregnant")){
+                item.pregnant = YesNo.valueOf(object.getString("pregnant"));
+            }
+            if( ! object.isNull("breastFeeding")){
+                item.breastFeeding = YesNo.valueOf(object.getString("breastFeeding"));
+            }
+            item.copperSulphate = PassFail.valueOf(object.getString("copperSulphate"));
+            if( ! object.isNull("hamocue")){
+                item.hamocue = PassFail.valueOf(object.getString("hamocue"));
+            }
+            item.packType = PackType.valueOf(object.getString("packType"));
+            item.weight = object.getDouble("weight");
+            item.bloodPressure = object.getString("bloodPressure");
+            item.entry = object.getString("entry");
+            if( ! object.isNull("reasonForTesting")){
+                item.reasonForTesting = ReasonForTesting.valueOf(object.getString("reasonForTesting"));
+            }
+        }catch (JSONException ex){
+            ex.printStackTrace();
+            return null;
+        }
+        return item;
+    }
+
+    public static ArrayList<DonationStats> fromJSON(JSONArray array){
+        ArrayList<DonationStats> list = new ArrayList<>();
+        for(int i = 0; i < array.length(); i++){
+            JSONObject object = null;
+            try{
+                object = array.getJSONObject(i);
+            }catch (JSONException ex){
+                ex.printStackTrace();
+                continue;
+            }
+            DonationStats item = fromJSON(object);
+            if(item != null)
+                list.add(item);
+        }
+        return list;
     }
 }

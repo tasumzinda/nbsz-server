@@ -343,12 +343,13 @@ public class BaseActivity extends AppCompatActivity {
 
                 if( ! counsellor.isNull("id")){
                     c.serverId = counsellor.getLong("id");
+                    Counsellor duplicate = Counsellor.findById(c.serverId);
+                    if(duplicate == null){
+                        c.save();
+                    }
+                    Log.d("Saved counsellor", c.name);
                 }
-                Counsellor duplicate = Counsellor.findById(c.serverId);
-                if(duplicate == null){
-                    c.save();
-                }
-                Log.d("Saved counsellor", c.name);
+
                 item.counsellor = c;
             }
             if( ! object.isNull("deferredReason")){

@@ -17,8 +17,11 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import com.totalit.nbsz_server.R;
+import com.totalit.nbsz_server.business.domain.Donation;
+import com.totalit.nbsz_server.business.domain.DonationStats;
 import com.totalit.nbsz_server.business.domain.Donor;
 import com.totalit.nbsz_server.business.util.AppUtil;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -28,6 +31,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class MainActivity extends BaseActivity {
 
@@ -243,9 +247,30 @@ public class MainActivity extends BaseActivity {
     }
 
     public void saveDonorData(JSONObject object){
-        Log.d("JSON", object.toString());
+        JSONArray array = null;
+        try{
+            array = object.getJSONArray("donations");
+        }catch (JSONException ex){
+            ex.printStackTrace();
+        }
+
         Donor item = fromJSON(object);
-        Log.d("Donor", AppUtil.createGson().toJson(item));
         item.save();
+        ArrayList<Donation> donations = Donation.fromJSON(array);
+        for(Donation m : donations){
+            m.person = item;
+            m.save();
+        }
+        try{
+            array = object.getJSONArray("donationStats");
+        }catch (JSONException ex){
+            ex.printStackTrace();
+        }
+        ArrayList<DonationStats> donationStats = DonationStats.fromJSON(array);
+        for(DonationStats m : donationStats){
+            m.person = item;
+            m.save();
+            Log.d("Saved don stats", AppUtil.createGson().toJson(m));
+        }
     }
 }
