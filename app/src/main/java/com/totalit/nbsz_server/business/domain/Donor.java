@@ -25,6 +25,10 @@ public class Donor extends Model implements Serializable {
     @Column(name = "server_id")
     @SerializedName("id")
     public Long server_id;
+
+    @Column
+    public String localId;
+
     @Expose
     @Column(name = "profession")
     public Profession profession;
@@ -183,6 +187,13 @@ public class Donor extends Model implements Serializable {
                 .executeSingle();
     }
 
+    public static Donor findByLocalId(String localId){
+        return new Select()
+                .from(Donor.class)
+                .where("localId = ?", localId)
+                .executeSingle();
+    }
+
     public static Donor findByServerId(Long id){
         return new Select()
                 .from(Donor.class)
@@ -249,6 +260,9 @@ public class Donor extends Model implements Serializable {
             item.surname = object.getString("surname").toUpperCase().trim();
             if( ! object.isNull("idNumber")){
                 item.idNumber = object.getString("idNumber");
+            }
+            if( ! object.isNull("localId")){
+                item.localId = object.getString("localId");
             }
             if( ! object.isNull("numberOfDonations")){
                 item.numberOfDonations = object.getInt("numberOfDonations");

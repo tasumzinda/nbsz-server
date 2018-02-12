@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import com.totalit.nbsz_server.R;
 import com.totalit.nbsz_server.business.domain.*;
+import com.totalit.nbsz_server.business.domain.util.UUIDGen;
 import com.totalit.nbsz_server.business.util.AppUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -212,8 +213,8 @@ public class MainActivity extends BaseActivity {
                             obj = new JSONObject(stringData);
                             String requestType = obj.getString("requestType");
                             if(requestType.equals("POST_DONOR")){
-                                saveDonorData(obj);
-                                result = "OK";
+                                String id = saveDonorData(obj);
+                                result = id;
                             }
                             if(requestType.equals("donorNumber")){
                                 String donorNumber = obj.getString("donorNumber");
@@ -283,51 +284,78 @@ public class MainActivity extends BaseActivity {
         thread.start();
     }
 
-    public void saveDonorData(JSONObject object){
+    public String saveDonorData(JSONObject object){
         JSONArray array = null;
-        try{
-            array = object.getJSONArray("donations");
-        }catch (JSONException ex){
-            ex.printStackTrace();
-        }
-
+        Log.d("Object", object.toString());
         Donor item = fromJSON(object);
-        item.save();
-
-        Log.d("Saved donor", AppUtil.createGson().toJson(item));
-        ArrayList<Donation> donations = Donation.fromJSON(array);
-        for(Donation m : donations){
-            m.person = item;
-            m.save();
-        }
-        try{
-            array = object.getJSONArray("donationStats");
-        }catch (JSONException ex){
-            ex.printStackTrace();
-        }
-        ArrayList<DonationStats> donationStats = DonationStats.fromJSON(array);
-        for(DonationStats m : donationStats){
-            m.person = item;
-            m.save();
-        }
-        try{
-            array = object.getJSONArray("offers");
-            Log.d("Offers", array.toString());
-        }catch(JSONException ex){
-            ex.printStackTrace();
-        }
-        ArrayList<Offer> offers = Offer.fromJSON(array);
-        for(Offer o : offers){
-            o.person = item;
-            ArrayList<Incentive> incentives = (ArrayList<Incentive>) o.incentives;
-            o.save();
-            for(Incentive incentive : incentives){
-                OfferIncentiveContract contract = new OfferIncentiveContract();
-                contract.offer = o;
-                contract.incentive = incentive;
-                contract.save();
-                Log.d("Saved contract", AppUtil.createGson().toJson(contract));
+        if(item.localId != null){
+            Donor res = Donor.findByLocalId(item.localId);
+            item = res;
+            item.save();
+            try{
+                array = object.getJSONArray("specialNotes");
+            }catch (JSONException ex){
+                ex.printStackTrace();
             }
+            ArrayList<SpecialNotes> specialNotes = SpecialNotes.fromJSON(array);
+            for(SpecialNotes note : specialNotes){
+                DonorSpecialNotesContract contract = new DonorSpecialNotesContract();
+                contract.donor = item;
+                contract.specialNotes = note;
+                contract.save();
+            }
+        }else{
+            item.localId = UUIDGen.generateUUID();
+            item.save();
+            try{
+                if( ! object.isNull("donations")){
+                    array = object.getJSONArray("donations");
+                    ArrayList<Donation> donations = Donation.fromJSON(array);
+                    for(Donation m : donations){
+                        m.person = item;
+                        m.save();
+                    }
+                }
+            }catch (JSONException ex){
+                ex.printStackTrace();
+            }
+
+            try{
+                if( ! object.isNull("donationStats")){
+                    array = object.getJSONArray("donationStats");
+                    ArrayList<DonationStats> donationStats = DonationStats.fromJSON(array);
+                    for(DonationStats m : donationStats){
+                        m.person = item;
+                        m.save();
+                    }
+                }
+
+            }catch (JSONException ex){
+                ex.printStackTrace();
+            }
+
+            try{
+                if( ! object.isNull("offers")){
+                    array = object.getJSONArray("offers");
+                    ArrayList<Offer> offers = Offer.fromJSON(array);
+                    for(Offer o : offers){
+                        o.person = item;
+                        ArrayList<Incentive> incentives = (ArrayList<Incentive>) o.incentives;
+                        o.save();
+                        for(Incentive incentive : incentives){
+                            OfferIncentiveContract contract = new OfferIncentiveContract();
+                            contract.offer = o;
+                            contract.incentive = incentive;
+                            contract.save();
+                        }
+                    }
+                }
+
+            }catch(JSONException ex){
+                ex.printStackTrace();
+            }
+
         }
+        return item.localId;
     }
 }

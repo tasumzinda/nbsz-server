@@ -63,8 +63,12 @@ public class SpecialNotes extends Model implements Serializable{
     public static SpecialNotes fromJSON(JSONObject object){
         SpecialNotes item = new SpecialNotes();
         try{
-            item.name = object.getString("name");
-            item.serverId = object.getLong("id");
+            if( ! object.isNull("name")){
+                item.name = object.getString("name");
+            }
+            if( ! object.isNull("id")){
+                item.serverId = object.getLong("id");
+            }
         }catch (JSONException ex){
             ex.printStackTrace();
             return null;
