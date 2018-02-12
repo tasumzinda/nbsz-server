@@ -295,7 +295,7 @@ public class BaseActivity extends AppCompatActivity {
 
             if( ! object.isNull("dob")){
                 item.dateOfBirth = DateUtil.getDateFromString(object.getString("dob"));
-                item.dob = DateUtil.formatDate(item.dateOfBirth);
+                item.dob = DateUtil.formatDateRest(item.dateOfBirth);
             }
 
             if( ! object.isNull("deferDate")){
@@ -311,9 +311,6 @@ public class BaseActivity extends AppCompatActivity {
             if( ! object.isNull("deferPeriod")){
                 item.deferPeriod = object.getInt("deferPeriod");
             }
-
-
-
             if( ! object.isNull("profession")){
                 JSONObject profession = object.getJSONObject("profession");
                 item.profession = Profession.findById(profession.getLong("id"));

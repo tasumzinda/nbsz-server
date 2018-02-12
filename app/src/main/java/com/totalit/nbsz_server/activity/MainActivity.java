@@ -17,9 +17,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import com.totalit.nbsz_server.R;
-import com.totalit.nbsz_server.business.domain.Donation;
-import com.totalit.nbsz_server.business.domain.DonationStats;
-import com.totalit.nbsz_server.business.domain.Donor;
+import com.totalit.nbsz_server.business.domain.*;
 import com.totalit.nbsz_server.business.util.AppUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,6 +30,7 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends BaseActivity {
 
@@ -49,6 +48,7 @@ public class MainActivity extends BaseActivity {
     private View textViewMessage;
     private TextView textViewIpAccess;
     private boolean end = false;
+    String result;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +90,9 @@ public class MainActivity extends BaseActivity {
 
         // INIT BROADCAST RECEIVER TO LISTEN NETWORK STATE CHANGED
         initBroadcastReceiverNetworkStateChanged();
+        for(Donor m : Donor.findByFirstNameAndLastNameAndDateOfBirth("TASU", "MUZINDA", "09/02/1988")){
+            Log.d("Donor", AppUtil.createGson().toJson(m));
+        }
     }
 
     //region Start And Stop AndroidWebServer
@@ -204,19 +207,53 @@ public class MainActivity extends BaseActivity {
                         BufferedReader input = new BufferedReader(new InputStreamReader(s.getInputStream()));
                         PrintWriter output = new PrintWriter(s.getOutputStream());
                         stringData = input.readLine();
-                        Log.d("Data", stringData);
                         JSONObject obj = null;
                         try{
                             obj = new JSONObject(stringData);
                             String requestType = obj.getString("requestType");
                             if(requestType.equals("POST_DONOR")){
                                 saveDonorData(obj);
+                                result = "OK";
+                            }
+                            if(requestType.equals("donorNumber")){
+                                String donorNumber = obj.getString("donorNumber");
+                                Donor item = Donor.findByDonorNumber(donorNumber);
+                                if(item != null){
+                                    result = AppUtil.createGson().toJson(item);
+                                }else{
+                                    result = "Not found";
+                                }
+                            }
+                            if(requestType.equals("idNumber")){
+                                String idNumber = obj.getString("idNumber");
+                                Donor item = Donor.findByNationalId(idNumber);
+                                if(item != null){
+                                    result = AppUtil.createGson().toJson(item);
+                                }else{
+                                    result = "Not found";
+                                }
+                            }
+                            if(requestType.equals("nameDob")){
+                                String firstName = obj.getString("firstName");
+                                String surname = obj.getString("surname");
+                                String dob = obj.getString("dob");
+                                List<Donor> donors = new ArrayList<>();
+                                if( ! firstName.isEmpty()){
+                                    donors = Donor.findByFirstNameAndLastNameAndDateOfBirth(firstName.toUpperCase(), surname.toUpperCase(), dob);
+                                }else{
+                                    donors = Donor.findByLastNameAndDateOfBirth(surname.toUpperCase(), dob);
+                                }
+                                if(donors.size() > 0){
+                                    result = AppUtil.createGson().toJson(donors);
+                                }else{
+                                    result = "Not found";
+                                }
                             }
                         }catch (JSONException ex){
                             ex.printStackTrace();
                             textViewIpAccess.setText(ex.getMessage());
                         }
-                        output.println("FROM SERVER - " + stringData.toUpperCase());
+                        output.println(result);
                         output.flush();
 
                         try {
@@ -256,6 +293,8 @@ public class MainActivity extends BaseActivity {
 
         Donor item = fromJSON(object);
         item.save();
+
+        Log.d("Saved donor", AppUtil.createGson().toJson(item));
         ArrayList<Donation> donations = Donation.fromJSON(array);
         for(Donation m : donations){
             m.person = item;
@@ -270,7 +309,25 @@ public class MainActivity extends BaseActivity {
         for(DonationStats m : donationStats){
             m.person = item;
             m.save();
-            Log.d("Saved don stats", AppUtil.createGson().toJson(m));
+        }
+        try{
+            array = object.getJSONArray("offers");
+            Log.d("Offers", array.toString());
+        }catch(JSONException ex){
+            ex.printStackTrace();
+        }
+        ArrayList<Offer> offers = Offer.fromJSON(array);
+        for(Offer o : offers){
+            o.person = item;
+            ArrayList<Incentive> incentives = (ArrayList<Incentive>) o.incentives;
+            o.save();
+            for(Incentive incentive : incentives){
+                OfferIncentiveContract contract = new OfferIncentiveContract();
+                contract.offer = o;
+                contract.incentive = incentive;
+                contract.save();
+                Log.d("Saved contract", AppUtil.createGson().toJson(contract));
+            }
         }
     }
 }

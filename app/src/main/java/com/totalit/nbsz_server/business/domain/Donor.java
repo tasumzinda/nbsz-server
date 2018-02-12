@@ -161,6 +161,9 @@ public class Donor extends Model implements Serializable {
     @Expose
     public List<DonationStats> donationStats;
 
+    @Expose
+    public List<Offer> offers;
+
     public String requestType;
 
     public Donor(){
@@ -199,6 +202,13 @@ public class Donor extends Model implements Serializable {
                 .from(Donor.class)
                 .where("id_number = ?", nationalId)
                 .executeSingle();
+    }
+
+    public static List<Donor> findByFirstName(String firstName){
+        return new Select()
+                .from(Donor.class)
+                .where("first_name = ?", firstName)
+                .execute();
     }
 
 
