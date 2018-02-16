@@ -18,6 +18,7 @@ import com.totalit.nbsz_server.business.domain.Donor;
 import com.totalit.nbsz_server.business.domain.User;
 import com.totalit.nbsz_server.business.util.AppUtil;
 import com.totalit.nbsz_server.business.rest.PushPullService;
+import com.totalit.nbsz_server.business.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.HashMap;
@@ -77,6 +78,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener{
                             progressDialog.setCancelable(false);
                             try{
                                 JSONObject object = response.getJSONObject("centre");
+                                Log.d("Centre", object.toString());
                                 Centre centre = Centre.fromJSON(object);
                                 if(Centre.findById(centre.server_id) == null){
                                     centre.save();

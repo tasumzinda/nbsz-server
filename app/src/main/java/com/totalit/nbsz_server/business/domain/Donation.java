@@ -61,6 +61,13 @@ public class Donation extends Model {
     @Expose
     public Centre city;
 
+    @Expose
+    public String requestType = "POST_DONATION";
+
+    @Expose
+    @Column
+    public String localId;
+
 
     public Donation(){
         super();
@@ -70,6 +77,13 @@ public class Donation extends Model {
         return new Select()
                 .from(Donation.class)
                 .execute();
+    }
+
+    public static Donation findByLocalId(String localId){
+        return new Select()
+                .from(Donation.class)
+                .where("localId = ?", localId)
+                .executeSingle();
     }
 
     public static List<Donation> findByDonor(Donor donor){
@@ -98,6 +112,10 @@ public class Donation extends Model {
             if( ! object.isNull("city")){
                 JSONObject city = object.getJSONObject("city");
                 item.city = Centre.findById(city.getLong("id"));
+            }
+            if( ! object.isNull("person")){
+                JSONObject person = object.getJSONObject("person");
+                item.person = Donor.findByLocalId(person.getString("localId"));
             }
         }catch (JSONException ex){
             ex.printStackTrace();

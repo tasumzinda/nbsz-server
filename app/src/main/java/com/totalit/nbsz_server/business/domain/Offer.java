@@ -98,6 +98,13 @@ public class Offer extends Model {
     @Expose
     public List<Incentive> incentives;
 
+    @Expose
+    public String requestType = "POST_OFFER";
+
+    @Expose
+    @Column
+    public String localId;
+
     public Offer(){
         super();
     }
@@ -109,6 +116,13 @@ public class Offer extends Model {
                 .execute();
     }
 
+    public static Offer findByLocalId(String localId){
+        return new Select()
+                .from(Offer.class)
+                .where("localId = ?", localId)
+                .executeSingle();
+    }
+
     public static List<Offer> getAll(){
         return new Select()
                 .from(Offer.class)
@@ -118,45 +132,72 @@ public class Offer extends Model {
     public static Offer fromJSON(JSONObject object){
         Offer item = new Offer();
         try{
+            if( ! object.isNull("person")){
+                JSONObject person = object.getJSONObject("person");
+                item.person = Donor.findByLocalId(person.getString("localId"));
+            }
             if( ! object.isNull("id")){
                 item.serverId = object.getLong("id");
             }
-            item.offerDate = DateUtil.getDateFromString(object.getString("offer"));
-            JSONObject user = object.getJSONObject("user");
-            item.user = User.findById(user.getLong("id"));
-            //JSONObject person = object.getJSONObject("person");
-            //item.person = Donor.findByServerId(person.getLong("id"));
-            JSONObject site = object.getJSONObject("collectSite");
-            item.collectSite = CollectSite.findById(site.getLong("id"));
+            if( ! object.isNull("offer")){
+                item.offerDate = DateUtil.getDateFromString(object.getString("offer"));
+            }
+            if( ! object.isNull("user")){
+                JSONObject user = object.getJSONObject("user");
+                item.user = User.findById(user.getLong("id"));
+            }
+            if( ! object.isNull("collectSite")){
+                JSONObject site = object.getJSONObject("collectSite");
+                item.collectSite = CollectSite.findById(site.getLong("id"));
+            }
             if(! object.isNull("donationType")){
                 JSONObject donationType = object.getJSONObject("donationType");
                 item.donationType = DonationType.findById(donationType.getLong("id"));
             }
-            item.donationKind = object.getString("donationKind");
-            item.checkUp = object.getString("checkUp");
-            item.phlebotomy = object.getString("phlebotomy");
-            item.donationNumber = object.getString("donationNumber");
-            item.directed = object.getString("directed");
+            if( ! object.isNull("donationKind")){
+                item.donationKind = object.getString("donationKind");
+            }
+            if( ! object.isNull("checkUp")){
+                item.checkUp = object.getString("checkUp");
+            }
+            if( ! object.isNull("phlebotomy")){
+                item.phlebotomy = object.getString("phlebotomy");
+            }
+            if( ! object.isNull("donationNumber")){
+                item.donationNumber = object.getString("donationNumber");
+            }
+            if( ! object.isNull("directed")){
+                item.directed = object.getString("directed");
+            }
             if( ! object.isNull("defferredReason")){
                 JSONObject defferredReason = object.getJSONObject("defferredReason");
                 item.defferredReason = DeferredReason.findById(defferredReason.getLong("id"));
                 item.deferDate = DateUtil.getDateFromString(object.getString("defer"));
             }
-            item.donorAge = object.getInt("donorAge");
-            JSONArray incentives = object.getJSONArray("incentives");
-            ArrayList<Incentive> incentiveList = new ArrayList<>();
-            for(int i = 0; i < incentives.length(); i++){
-                JSONObject jsonObject = incentives.getJSONObject(i);
-                Incentive incentive = Incentive.fromJSON(jsonObject);
-                incentiveList.add(incentive);
+            if( ! object.isNull("donorAge")){
+                item.donorAge = object.getInt("donorAge");
             }
-            item.incentives = incentiveList;
+            if( ! object.isNull("incentives")){
+                JSONArray incentives = object.getJSONArray("incentives");
+                ArrayList<Incentive> incentiveList = new ArrayList<>();
+                for(int i = 0; i < incentives.length(); i++){
+                    JSONObject jsonObject = incentives.getJSONObject(i);
+                    Incentive incentive = Incentive.fromJSON(jsonObject);
+                    incentiveList.add(incentive);
+                }
+                item.incentives = incentiveList;
+            }
+
             if( ! object.isNull("pulse")){
                 item.pulse = object.getInt("pulse");
             }
-            item.offerTime = object.getString("offerTime");
-            JSONObject centre = object.getJSONObject("centre");
-            item.centre = Centre.findById(centre.getLong("id"));
+            if( ! object.isNull("offerTime")){
+                item.offerTime = object.getString("offerTime");
+            }
+            if( ! object.isNull("centre")){
+                JSONObject centre = object.getJSONObject("centre");
+                item.centre = Centre.findById(centre.getLong("id"));
+            }
         }catch (JSONException ex){
             ex.printStackTrace();
             return null;

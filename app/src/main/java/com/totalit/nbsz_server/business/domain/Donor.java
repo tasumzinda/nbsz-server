@@ -26,6 +26,7 @@ public class Donor extends Model implements Serializable {
     @SerializedName("id")
     public Long server_id;
 
+    @Expose
     @Column
     public String localId;
 
@@ -129,6 +130,7 @@ public class Donor extends Model implements Serializable {
     @Column(name = "entry_time")
     public String entryTime;
 
+    @Expose
     @Column
     public Integer pushed = 0;
 
@@ -155,11 +157,13 @@ public class Donor extends Model implements Serializable {
     @Expose
     public Integer numberOfDonations;
 
-
+    @Expose
+    @Column
+    public DonateDefer donateDefer;
 
     public List<SpecialNotes> specialNotes;
 
-    @Expose
+    //@Expose
     public List<Donation> donations;
 
     @Expose
@@ -169,6 +173,8 @@ public class Donor extends Model implements Serializable {
     public List<Offer> offers;
 
     public String requestType;
+
+
 
     public Donor(){
         super();
@@ -213,13 +219,6 @@ public class Donor extends Model implements Serializable {
                 .from(Donor.class)
                 .where("id_number = ?", nationalId)
                 .executeSingle();
-    }
-
-    public static List<Donor> findByFirstName(String firstName){
-        return new Select()
-                .from(Donor.class)
-                .where("first_name = ?", firstName)
-                .execute();
     }
 
 
@@ -275,8 +274,9 @@ public class Donor extends Model implements Serializable {
             }
 
             if( ! object.isNull("dob")){
-                item.dateOfBirth = DateUtil.getDateFromString(object.getString("dob"));
-                item.dob = DateUtil.formatDate(item.dateOfBirth);
+                String dob = object.getString("dob");
+                item.dateOfBirth = DateUtil.getFromString(dob);
+                item.dob = dob;
             }
 
             if( ! object.isNull("deferDate")){
@@ -292,9 +292,6 @@ public class Donor extends Model implements Serializable {
             if( ! object.isNull("deferPeriod")){
                 item.deferPeriod = object.getInt("deferPeriod");
             }
-
-
-
             if( ! object.isNull("profession")){
                 JSONObject profession = object.getJSONObject("profession");
                 item.profession = Profession.findById(profession.getLong("id"));
@@ -344,6 +341,25 @@ public class Donor extends Model implements Serializable {
             }
             if( ! object.isNull("donorNumber")){
                 item.donorNumber = object.getString("donorNumber");
+            }
+            if( ! object.isNull("donateDefer")){
+                item.donateDefer = DonateDefer.valueOf(object.getString("donateDefer"));
+            }
+            if( ! object.isNull("pushed")){
+                item.pushed = object.getInt("pushed");
+            }
+            if( ! object.isNull("localId")){
+                item.localId = object.getString("localId");
+            }
+            if( ! object.isNull("bledBy")){
+                JSONObject user = object.getJSONObject("bledBy");
+                item.bledBy = User.findById(user.getLong("id"));
+            }
+            if( ! object.isNull("accepted")){
+                item.accepted = object.getString("accepted");
+            }
+            if( ! object.isNull("pushed")){
+                item.pushed = object.getInt("pushed");
             }
 
         }catch (JSONException ex){
